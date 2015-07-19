@@ -2,7 +2,7 @@ use std::str::Chars;
 use std::iter::Peekable;
 
 
-pub struct StateFn<T: PartialEq>(fn(&mut Lexer<T>) -> Option<StateFn<T>>);
+pub struct StateFn<T: PartialEq>(pub fn(&mut Lexer<T>) -> Option<StateFn<T>>);
 
 
 #[derive(Debug, PartialEq)]
