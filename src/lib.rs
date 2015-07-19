@@ -80,8 +80,8 @@ impl<'a, T: PartialEq> Lexer<'a, T> {
         self.start = self.pos;
     }
 
-    pub fn finish_started(&mut self, typ: T) {
-        if self.pos >= self.start {
+    pub fn emit_nonempty(&mut self, typ: T) {
+        if self.pos > self.start {
             self.emit(typ);
         }
     }

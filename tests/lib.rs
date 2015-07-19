@@ -17,14 +17,14 @@ pub enum ItemType {
 fn lex_text(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
     loop {
         if l.remaining_input().starts_with("//") {
-            l.finish_started(ItemType::Text);
+            l.emit_nonempty(ItemType::Text);
             l.next();
             return Some(StateFn(lex_comment));
         }
         match l.peek() {
             None => break,
             Some(',') => {
-                l.finish_started(ItemType::Text);
+                l.emit_nonempty(ItemType::Text);
                 l.next();
                 l.emit(ItemType::Comma);
             },
@@ -32,7 +32,7 @@ fn lex_text(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
         }
         l.next();
     }
-    l.finish_started(ItemType::Text);
+    l.emit_nonempty(ItemType::Text);
     l.emit(ItemType::EOF);
     None
 }
@@ -43,7 +43,7 @@ fn lex_comment(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
         match l.peek() {
             None => break,
             Some('\n') => {
-                l.finish_started(ItemType::Comment);
+                l.emit_nonempty(ItemType::Comment);
                 l.next();
                 return Some(StateFn(lex_text));
             },
@@ -51,7 +51,7 @@ fn lex_comment(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
         }
         l.next();
     }
-    l.finish_started(ItemType::Comment);
+    l.emit_nonempty(ItemType::Comment);
     l.emit(ItemType::EOF);
     None
 }
