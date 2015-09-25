@@ -2,3 +2,15 @@
 name = "lexer"
 version = "0.1.0"
 authors = ["davoodoo42@gmail.com"]
+
+[[test]]
+name = "lexer-calc-example"
+path = "examples/calc.rs"
+
+[[test]]
+name = "lexer-tests"
+path = "tests/lib.rs"
+
+[[test]]
+name = "lexer"
+path = "src/lib.rs"
