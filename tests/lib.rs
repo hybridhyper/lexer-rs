@@ -2,9 +2,6 @@ extern crate lexer;
 use lexer::{Item, StateFn, Lexer};
 
 
-const DATA: &'static str = "foo,bar,baz // some comment";
-
-
 #[derive(Debug, PartialEq)]
 pub enum ItemType {
     Comma,
@@ -21,16 +18,16 @@ fn lex_text(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
             l.next();
             return Some(StateFn(lex_comment));
         }
-        match l.peek() {
+        match l.next() {
             None => break,
             Some(',') => {
+                l.backup();
                 l.emit_nonempty(ItemType::Text);
                 l.next();
                 l.emit(ItemType::Comma);
             },
             Some(_) => {},
         }
-        l.next();
     }
     l.emit_nonempty(ItemType::Text);
     l.emit(ItemType::EOF);
@@ -40,16 +37,14 @@ fn lex_text(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
 
 fn lex_comment(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
     loop {
-        match l.peek() {
+        match l.next() {
             None => break,
             Some('\n') => {
                 l.emit_nonempty(ItemType::Comment);
-                l.next();
                 return Some(StateFn(lex_text));
             },
             Some(_) => {},
         }
-        l.next();
     }
     l.emit_nonempty(ItemType::Comment);
     l.emit(ItemType::EOF);
@@ -59,7 +54,8 @@ fn lex_comment(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
 
 #[test]
 fn test_lexer() {
-    let items = lexer::lex(DATA, lex_text);
+    let data = "foo,bar,baz // some comment";
+    let items = lexer::lex(data, lex_text);
     let expected_items = vec!(
         Item{typ: ItemType::Text, val: "foo"},
         Item{typ: ItemType::Comma, val: ","},
