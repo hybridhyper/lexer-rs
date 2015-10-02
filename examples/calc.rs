@@ -34,26 +34,6 @@ fn ignore_whitespace(l: &mut Lexer<ItemType>) -> Option<()> {
     Some(())
 }
 
-// fn lex_unary_op(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
-//     if let None = ignore_whitespace(l) {
-//         return None;
-//     }
-//
-//     if l.accept(NEGATE_SIGN) {
-//         match l.peek() {
-//             Some(ch) if NUMBERS.contains(ch) => {
-//                 l.backup();
-//                 return Some(StateFn(lex_number));
-//             },
-//             _ => {},
-//         };
-//
-//         l.emit(ItemType::OperatorNegate);
-//     }
-//
-//     Some(StateFn(lex_group_or_number))
-// }
-
 fn lex_binary_op(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
     loop {
         match l.next() {
