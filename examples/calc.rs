@@ -105,9 +105,23 @@ fn lex_number(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
 }
 
 fn evaluate_group(items: &[Item<ItemType>]) -> f64 {
-    let end_pos = items.iter()
-                        .position(|item| item.typ == ItemType::GroupEnd)
-                        .expect("unclosed group");
+    let end_pos = {
+        let mut inner_groups = 0usize;
+        let mut pos = None;
+
+        for (idx, item) in items.iter().enumerate() {
+            match item.typ {
+                ItemType::GroupStart => inner_groups += 1,
+                ItemType::GroupEnd if inner_groups > 0 => inner_groups -= 1,
+                ItemType::GroupEnd if inner_groups == 0 => {
+                    pos = Some(idx);
+                    break;
+                }
+                _ => {},
+            }
+        }
+        pos
+    }.expect("unclosed group");
 
     evaluate_binary_op(&items[end_pos+1..], evaluate(&items[..end_pos]))
 }
