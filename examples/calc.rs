@@ -34,26 +34,6 @@ fn ignore_whitespace(l: &mut Lexer<ItemType>) -> Option<()> {
     Some(())
 }
 
-// fn lex_unary_op(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
-//     if let None = ignore_whitespace(l) {
-//         return None;
-//     }
-//
-//     if l.accept(NEGATE_SIGN) {
-//         match l.peek() {
-//             Some(ch) if NUMBERS.contains(ch) => {
-//                 l.backup();
-//                 return Some(StateFn(lex_number));
-//             },
-//             _ => {},
-//         };
-//
-//         l.emit(ItemType::OperatorNegate);
-//     }
-//
-//     Some(StateFn(lex_group_or_number))
-// }
-
 fn lex_binary_op(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
     loop {
         match l.next() {
@@ -125,9 +105,23 @@ fn lex_number(l: &mut Lexer<ItemType>) -> Option<StateFn<ItemType>> {
 }
 
 fn evaluate_group(items: &[Item<ItemType>]) -> f64 {
-    let end_pos = items.iter()
-                        .position(|item| item.typ == ItemType::GroupEnd)
-                        .expect("unclosed group");
+    let end_pos = {
+        let mut inner_groups = 0usize;
+        let mut pos = None;
+
+        for (idx, item) in items.iter().enumerate() {
+            match item.typ {
+                ItemType::GroupStart => inner_groups += 1,
+                ItemType::GroupEnd if inner_groups > 0 => inner_groups -= 1,
+                ItemType::GroupEnd if inner_groups == 0 => {
+                    pos = Some(idx);
+                    break;
+                }
+                _ => {},
+            }
+        }
+        pos
+    }.expect("unclosed group");
 
     evaluate_binary_op(&items[end_pos+1..], evaluate(&items[..end_pos]))
 }
