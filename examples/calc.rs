@@ -110,14 +110,14 @@ fn evaluate_group(items: &[Item<ItemType>]) -> f64 {
         let mut pos = None;
 
         for (idx, item) in items.iter().enumerate() {
-            match item.typ {
-                ItemType::GroupStart => inner_groups += 1,
-                ItemType::GroupEnd if inner_groups > 0 => inner_groups -= 1,
+            inner_groups = match item.typ {
+                ItemType::GroupStart => inner_groups + 1,
+                ItemType::GroupEnd if inner_groups > 0 => inner_groups - 1,
                 ItemType::GroupEnd if inner_groups == 0 => {
                     pos = Some(idx);
                     break;
                 }
-                _ => {},
+                _ => inner_groups,
             }
         }
         pos
