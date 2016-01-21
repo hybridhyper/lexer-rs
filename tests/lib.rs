@@ -57,13 +57,13 @@ fn test_lexer() {
     let data = "foo,bar,baz // some comment";
     let items = lexer::lex(data, lex_text);
     let expected_items = vec!(
-        Item{typ: ItemType::Text, val: "foo"},
-        Item{typ: ItemType::Comma, val: ","},
-        Item{typ: ItemType::Text, val: "bar"},
-        Item{typ: ItemType::Comma, val: ","},
-        Item{typ: ItemType::Text, val: "baz "},
-        Item{typ: ItemType::Comment, val: "// some comment"},
-        Item{typ: ItemType::EOF, val: ""}
+        Item{typ: ItemType::Text, val: "foo", col: 1, lineno: 1},
+        Item{typ: ItemType::Comma, val: ",", col: 4, lineno: 1},
+        Item{typ: ItemType::Text, val: "bar", col: 5, lineno: 1},
+        Item{typ: ItemType::Comma, val: ",", col: 8, lineno: 1},
+        Item{typ: ItemType::Text, val: "baz ", col: 9, lineno: 1},
+        Item{typ: ItemType::Comment, val: "// some comment", col: 13, lineno: 1},
+        Item{typ: ItemType::EOF, val: "", col: 28, lineno: 1}
     );
 
     assert_eq!(items, expected_items);
