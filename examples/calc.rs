@@ -110,14 +110,14 @@ fn evaluate_group(items: &[Item<ItemType>]) -> f64 {
         let mut pos = None;
 
         for (idx, item) in items.iter().enumerate() {
-            match item.typ {
-                ItemType::GroupStart => inner_groups += 1,
-                ItemType::GroupEnd if inner_groups > 0 => inner_groups -= 1,
+            inner_groups = match item.typ {
+                ItemType::GroupStart => inner_groups + 1,
+                ItemType::GroupEnd if inner_groups > 0 => inner_groups - 1,
                 ItemType::GroupEnd if inner_groups == 0 => {
                     pos = Some(idx);
                     break;
                 }
-                _ => {},
+                _ => inner_groups,
             }
         }
         pos
@@ -194,28 +194,32 @@ fn main() {
 fn test_parser() {
     let data = "-( 123 + 2 * 3 ) * 4 + -5 * -(5+6)";
     let expected_items = vec!(
-        Item { typ: ItemType::OperatorNegate, val: "-" },
-        Item { typ: ItemType::GroupStart, val: "(" },
-        Item { typ: ItemType::Number, val: "123" },
-        Item { typ: ItemType::OperatorPlus, val: "+" },
-        Item { typ: ItemType::Number, val: "2" },
-        Item { typ: ItemType::OperatorMul, val: "*" },
-        Item { typ: ItemType::Number, val: "3" },
-        Item { typ: ItemType::GroupEnd, val: ")" },
-        Item { typ: ItemType::OperatorMul, val: "*" },
-        Item { typ: ItemType::Number, val: "4" },
-        Item { typ: ItemType::OperatorPlus, val: "+" },
-        Item { typ: ItemType::Number, val: "-5" },
-        Item { typ: ItemType::OperatorMul, val: "*" },
-        Item { typ: ItemType::OperatorNegate, val: "-" },
-        Item { typ: ItemType::GroupStart, val: "(" },
-        Item { typ: ItemType::Number, val: "5" },
-        Item { typ: ItemType::OperatorPlus, val: "+" },
-        Item { typ: ItemType::Number, val: "6" },
-        Item { typ: ItemType::GroupEnd, val: ")" },
+        Item { typ: ItemType::OperatorNegate, val: "-", col: 1, lineno: 1 },
+        Item { typ: ItemType::GroupStart, val: "(", col: 2, lineno: 1 },
+        Item { typ: ItemType::Number, val: "123", col: 4, lineno: 1 },
+        Item { typ: ItemType::OperatorPlus, val: "+", col: 8, lineno: 1 },
+        Item { typ: ItemType::Number, val: "2", col: 10, lineno: 1 },
+        Item { typ: ItemType::OperatorMul, val: "*", col: 12, lineno: 1 },
+        Item { typ: ItemType::Number, val: "3", col: 14, lineno: 1 },
+        Item { typ: ItemType::GroupEnd, val: ")", col: 16, lineno: 1 },
+        Item { typ: ItemType::OperatorMul, val: "*", col: 18, lineno: 1 },
+        Item { typ: ItemType::Number, val: "4", col: 20, lineno: 1 },
+        Item { typ: ItemType::OperatorPlus, val: "+", col: 22, lineno: 1 },
+        Item { typ: ItemType::Number, val: "-5", col: 24, lineno: 1 },
+        Item { typ: ItemType::OperatorMul, val: "*", col: 27, lineno: 1 },
+        Item { typ: ItemType::OperatorNegate, val: "-", col: 29, lineno: 1 },
+        Item { typ: ItemType::GroupStart, val: "(", col: 30, lineno: 1 },
+        Item { typ: ItemType::Number, val: "5", col: 31, lineno: 1 },
+        Item { typ: ItemType::OperatorPlus, val: "+", col: 32, lineno: 1 },
+        Item { typ: ItemType::Number, val: "6", col: 33, lineno: 1 },
+        Item { typ: ItemType::GroupEnd, val: ")", col: 34, lineno: 1 },
     );
     let items = lexer::lex(data, lex_group_or_number);
-    println!("data: {:?}", data);
-    println!("items: {:?}", items);
+
+    for (item, expected) in items.iter().zip(expected_items.iter()) {
+        println!("ITEM: {:?}", item);
+        assert_eq!(item, expected);
+    }
+
     assert_eq!(expected_items, items);
 }
