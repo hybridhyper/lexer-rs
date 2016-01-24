@@ -66,12 +66,9 @@ impl<'a, T: PartialEq> Lexer<'a, T> {
                 self.prev_pos = self.pos.clone();
                 self.width = ch.len_utf8();
                 self.pos.raw += self.width;
+                self.pos.is_newline = ch == '\n';
 
-                if ch == '\n' {
-                    self.pos.is_newline = true;
-                }
-
-                if self.prev_pos.is_newline {
+                if self.pos.is_newline {
                     self.pos.lineno += 1;
                     self.pos.col = 1;
                 } else {
